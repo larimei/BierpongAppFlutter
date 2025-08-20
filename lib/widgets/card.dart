@@ -63,7 +63,7 @@ class _AvatarCardPageState extends State<AvatarCardPage> {
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: <Color>[_color, const Color.fromARGB(0, 255, 255, 255)],
+            colors: <Color>[_color, Colors.transparent],
           ),
         ),
         child: SafeArea(
@@ -186,7 +186,7 @@ class _AvatarCardPageState extends State<AvatarCardPage> {
                                       child: ListView(
                                         padding: const EdgeInsets.all(16),
                                         children: [
-                                          BlockPicker(
+                                          ColorPicker(
                                             pickerColor: _color,
                                             onColorChanged: _setColor,
                                           ),
