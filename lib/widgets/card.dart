@@ -8,16 +8,14 @@ class AvatarCardPage extends StatefulWidget {
   final Widget child;
   final Widget? bottom;
 
-  final Color initialAvatarBgColor;
   final Color initialAvatarIconColor;
-  final ValueChanged<(Color bg, Color icon)>? onAvatarColorsChanged;
+  final ValueChanged<Color>? onAvatarColorsChanged;
 
   final double avatarRadius;
   final double topOffset;
   final double maxWidth;
   final EdgeInsets pagePadding;
   final EdgeInsets cardPadding;
-  final Gradient backgroundGradient;
 
   const AvatarCardPage({
     super.key,
@@ -26,7 +24,6 @@ class AvatarCardPage extends StatefulWidget {
     required this.child,
     this.bottom,
     this.avatarIconSize = 64,
-    this.initialAvatarBgColor = const Color(0xFFFFFFFF),
     this.initialAvatarIconColor = const Color(0xFF1D2C6B),
     this.onAvatarColorsChanged,
     this.avatarRadius = 64,
@@ -34,11 +31,6 @@ class AvatarCardPage extends StatefulWidget {
     this.maxWidth = 420,
     this.pagePadding = const EdgeInsets.all(16),
     this.cardPadding = const EdgeInsets.fromLTRB(20, 56, 20, 24),
-    this.backgroundGradient = const LinearGradient(
-      begin: Alignment.topCenter,
-      end: Alignment.bottomCenter,
-      colors: [Color(0xFF0E1A3A), Color.fromARGB(0, 255, 255, 255)],
-    ),
   });
 
   @override
@@ -46,27 +38,20 @@ class AvatarCardPage extends StatefulWidget {
 }
 
 class _AvatarCardPageState extends State<AvatarCardPage> {
-  late Color _bg;
-  late Color _fg;
+  late Color _color;
   bool _showPicker = false;
 
   @override
   void initState() {
     super.initState();
-    _bg = widget.initialAvatarBgColor;
-    _fg = widget.initialAvatarIconColor;
+    _color = widget.initialAvatarIconColor;
   }
 
   void _togglePicker() => setState(() => _showPicker = !_showPicker);
 
-  void _setBg(Color c) {
-    setState(() => _bg = c);
-    widget.onAvatarColorsChanged?.call((_bg, _fg));
-  }
-
-  void _setFg(Color c) {
-    setState(() => _fg = c);
-    widget.onAvatarColorsChanged?.call((_bg, _fg));
+  void _setColor(Color c) {
+    setState(() => _color = c);
+    widget.onAvatarColorsChanged?.call((_color));
   }
 
   @override
@@ -74,7 +59,13 @@ class _AvatarCardPageState extends State<AvatarCardPage> {
     return Scaffold(
       appBar: AppBar(title: Text(widget.appBarTitle)),
       body: Container(
-        decoration: BoxDecoration(gradient: widget.backgroundGradient),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: <Color>[_color, const Color.fromARGB(0, 255, 255, 255)],
+          ),
+        ),
         child: SafeArea(
           child: LayoutBuilder(
             builder: (context, constraints) {
@@ -145,11 +136,11 @@ class _AvatarCardPageState extends State<AvatarCardPage> {
                                 onTap: _togglePicker,
                                 child: CircleAvatar(
                                   radius: widget.avatarRadius,
-                                  backgroundColor: _bg,
+                                  backgroundColor: Colors.white,
                                   child: Icon(
                                     widget.avatarIconData,
                                     size: widget.avatarIconSize,
-                                    color: _fg,
+                                    color: _color,
                                   ),
                                 ),
                               ),
@@ -159,55 +150,66 @@ class _AvatarCardPageState extends State<AvatarCardPage> {
 
                         if (_showPicker)
                           Positioned.fill(
-                            child: GestureDetector(
-                              onTap: _togglePicker,
-                              child: Container(
-                                alignment: Alignment.center,
-                                color: Colors.black45,
-                                child: GestureDetector(
-                                  onTap: () {},
-                                  child: ConstrainedBox(
-                                    constraints: const BoxConstraints(
-                                      maxWidth: 360,
-                                    ),
-                                    child: Material(
-                                      elevation: 12,
-                                      borderRadius: BorderRadius.circular(16),
-                                      color: Colors.white,
-                                      child: Padding(
-                                        padding: const EdgeInsets.all(16),
-                                        child: SingleChildScrollView(
-                                          child: Column(
-                                            mainAxisSize: MainAxisSize.min,
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.stretch,
-                                            children: [
-                                              Text(
-                                                'Icon-Farbe',
-                                                style: Theme.of(
-                                                  context,
-                                                ).textTheme.titleMedium,
-                                              ),
-                                              const SizedBox(height: 8),
-                                              BlockPicker(
-                                                pickerColor: _fg,
-                                                onColorChanged: _setFg,
-                                              ),
-                                              const SizedBox(height: 16),
-                                              Align(
-                                                alignment:
-                                                    Alignment.centerRight,
-                                                child: FilledButton(
-                                                  onPressed: _togglePicker,
-                                                  child: const Text('Fertig'),
-                                                ),
-                                              ),
-                                            ],
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(16),
+                              child: Material(
+                                color: Colors.white,
+                                child: Column(
+                                  children: [
+                                    Padding(
+                                      padding: const EdgeInsets.fromLTRB(
+                                        16,
+                                        12,
+                                        8,
+                                        8,
+                                      ),
+                                      child: Row(
+                                        children: [
+                                          Expanded(
+                                            child: Text(
+                                              'Change Color',
+                                              style: Theme.of(
+                                                context,
+                                              ).textTheme.titleMedium,
+                                            ),
                                           ),
+                                          IconButton(
+                                            onPressed: _togglePicker,
+                                            tooltip: 'Close',
+                                            icon: const Icon(Icons.close),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+
+                                    Expanded(
+                                      child: ListView(
+                                        padding: const EdgeInsets.all(16),
+                                        children: [
+                                          BlockPicker(
+                                            pickerColor: _color,
+                                            onColorChanged: _setColor,
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+
+                                    SafeArea(
+                                      top: false,
+                                      child: Padding(
+                                        padding: const EdgeInsets.fromLTRB(
+                                          16,
+                                          8,
+                                          16,
+                                          16,
+                                        ),
+                                        child: FilledButton(
+                                          onPressed: _togglePicker,
+                                          child: const Text('Ready'),
                                         ),
                                       ),
                                     ),
-                                  ),
+                                  ],
                                 ),
                               ),
                             ),
