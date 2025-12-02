@@ -15,7 +15,7 @@ class PhoneFrame extends StatelessWidget {
           child: SizedBox(
             width: isNarrow ? double.infinity : phoneWidth,
             child: Material(
-              color: Theme.of(context).colorScheme.background,
+              color: Theme.of(context).colorScheme.surface,
               child: child,
             ),
           ),

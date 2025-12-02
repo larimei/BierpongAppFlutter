@@ -39,7 +39,6 @@ class AvatarCardPage extends StatefulWidget {
 
 class _AvatarCardPageState extends State<AvatarCardPage> {
   late Color _color;
-  bool _showPicker = false;
 
   @override
   void initState() {
@@ -47,7 +46,19 @@ class _AvatarCardPageState extends State<AvatarCardPage> {
     _color = widget.initialAvatarIconColor;
   }
 
-  void _togglePicker() => setState(() => _showPicker = !_showPicker);
+  void _showColorPickerDialog() {
+    showDialog(
+      context: context,
+      useRootNavigator: false,
+      builder: (context) => ColorPickerDialog(
+        initialColor: _color,
+        onColorChanged: (color) {
+          _setColor(color);
+          Navigator.of(context).pop();
+        },
+      ),
+    );
+  }
 
   void _setColor(Color c) {
     setState(() => _color = c);
@@ -133,7 +144,7 @@ class _AvatarCardPageState extends State<AvatarCardPage> {
                               shape: const CircleBorder(),
                               child: InkWell(
                                 customBorder: const CircleBorder(),
-                                onTap: _togglePicker,
+                                onTap: _showColorPickerDialog,
                                 child: CircleAvatar(
                                   radius: widget.avatarRadius,
                                   backgroundColor: Colors.white,
@@ -147,73 +158,6 @@ class _AvatarCardPageState extends State<AvatarCardPage> {
                             ),
                           ),
                         ),
-
-                        if (_showPicker)
-                          Positioned.fill(
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(16),
-                              child: Material(
-                                color: Colors.white,
-                                child: Column(
-                                  children: [
-                                    Padding(
-                                      padding: const EdgeInsets.fromLTRB(
-                                        16,
-                                        12,
-                                        8,
-                                        8,
-                                      ),
-                                      child: Row(
-                                        children: [
-                                          Expanded(
-                                            child: Text(
-                                              'Change Color',
-                                              style: Theme.of(
-                                                context,
-                                              ).textTheme.titleMedium,
-                                            ),
-                                          ),
-                                          IconButton(
-                                            onPressed: _togglePicker,
-                                            tooltip: 'Close',
-                                            icon: const Icon(Icons.close),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-
-                                    Expanded(
-                                      child: ListView(
-                                        padding: const EdgeInsets.all(16),
-                                        children: [
-                                          ColorPicker(
-                                            pickerColor: _color,
-                                            onColorChanged: _setColor,
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-
-                                    SafeArea(
-                                      top: false,
-                                      child: Padding(
-                                        padding: const EdgeInsets.fromLTRB(
-                                          16,
-                                          8,
-                                          16,
-                                          16,
-                                        ),
-                                        child: FilledButton(
-                                          onPressed: _togglePicker,
-                                          child: const Text('Ready'),
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ),
                       ],
                     ),
                   ),
@@ -222,6 +166,59 @@ class _AvatarCardPageState extends State<AvatarCardPage> {
             },
           ),
         ),
+      ),
+    );
+  }
+}
+
+class ColorPickerDialog extends StatefulWidget {
+  final Color initialColor;
+  final ValueChanged<Color> onColorChanged;
+
+  const ColorPickerDialog({
+    required this.initialColor,
+    required this.onColorChanged,
+  });
+
+  @override
+  State<ColorPickerDialog> createState() => _ColorPickerDialogState();
+}
+
+class _ColorPickerDialogState extends State<ColorPickerDialog> {
+  late Color _pickerColor;
+
+  @override
+  void initState() {
+    super.initState();
+    _pickerColor = widget.initialColor;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ConstrainedBox(
+      constraints: BoxConstraints(
+        maxHeight: MediaQuery.of(context).size.height * 0.8,
+      ),
+      child: AlertDialog(
+        content: SingleChildScrollView(
+          child: IntrinsicHeight(
+            child: ColorPicker(
+              pickerColor: _pickerColor,
+              onColorChanged: (color) => setState(() => _pickerColor = color),
+              pickerAreaHeightPercent: 0.8,
+              enableAlpha: false,
+              labelTypes: const [],
+            ),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              widget.onColorChanged(_pickerColor);
+            },
+            child: const Text('Done'),
+          ),
+        ],
       ),
     );
   }

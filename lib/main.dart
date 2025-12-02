@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
-import 'responsive.dart';
-import 'phoneframe.dart';
-import 'customicons.dart';
-import 'pages/player.dart';
+import 'widgets/responsive.dart';
+import 'widgets/phoneframe.dart';
+import 'ui/customicons.dart';
+import 'pages/playerpage.dart';
+import 'pages/teampage.dart';
+import 'pages/competitionpage.dart';
 
 void main() => runApp(const MyApp());
 
@@ -15,7 +17,6 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'Meine App',
       theme: ThemeData(useMaterial3: true, colorSchemeSeed: Colors.blue),
-
       builder: (context, child) => PhoneFrame(
         phoneWidth: 390,
         child: MediaQuery(
@@ -29,11 +30,7 @@ class MyApp extends StatelessWidget {
       home: ResponsiveScaffold(
         forceMobileLayout: true,
         titles: const ['Competitions', 'Teams', 'Player'],
-        pages: const [
-          Center(child: Text('Home')),
-          Center(child: Text('Suche')),
-          PlayerPage(),
-        ],
+        pages: const [CompetitionsPage(), TeamPage(), PlayerPage()],
         destinations: const [
           NavigationDestination(
             icon: Icon(CustomIcons.competitions),

@@ -1,44 +1,44 @@
 import 'package:flutter/material.dart';
-import 'addplayer.dart';
-import 'package:bierpongapp/db/playersrepository.dart';
-import 'package:bierpongapp/domain/player.dart';
+import 'addteam.dart';
+import 'package:bierpongapp/db/teamsrepository.dart';
+import 'package:bierpongapp/domain/team.dart';
 import 'package:bierpongapp/ui/customicons.dart';
 
-class PlayerPage extends StatefulWidget {
-  const PlayerPage({super.key});
+class TeamPage extends StatefulWidget {
+  const TeamPage({super.key});
 
   @override
-  State<PlayerPage> createState() => _PlayerPageState();
+  State<TeamPage> createState() => _TeamPageState();
 }
 
-class _PlayerPageState extends State<PlayerPage> {
-  final _playersRepository = PlayersRepository();
-  late Future<List<Player>> _playersFuture;
+class _TeamPageState extends State<TeamPage> {
+  final _teamsRepository = TeamsRepository();
+  late Future<List<Team>> _teamsFuture;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _fetchPlayers();
+    _fetchTeams();
   }
 
-  void _fetchPlayers() {
+  void _fetchTeams() {
     setState(() {
-      _playersFuture = _playersRepository.list();
+      _teamsFuture = _teamsRepository.list();
     });
   }
 
-  Future<void> _navigateToAddPlayer({Player? player}) async {
+  Future<void> _navigateToAddTeam({Team? team}) async {
     final String? resultName = await Navigator.push<String>(
       context,
-      MaterialPageRoute(builder: (_) => AddPlayerPage(player: player)),
+      MaterialPageRoute(builder: (_) => AddTeamPage(team: team)),
     );
 
     if (resultName != null && context.mounted) {
-      _fetchPlayers();
+      _fetchTeams();
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            'Player ${player == null ? 'added' : 'updated'}: $resultName',
+            'Team ${team == null ? 'added' : 'updated'}: $resultName',
           ),
         ),
       );
@@ -48,8 +48,8 @@ class _PlayerPageState extends State<PlayerPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: FutureBuilder<List<Player>>(
-        future: _playersFuture,
+      body: FutureBuilder<List<Team>>(
+        future: _teamsFuture,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
@@ -57,9 +57,9 @@ class _PlayerPageState extends State<PlayerPage> {
           if (snapshot.hasError) {
             return Center(child: Text('Error: ${snapshot.error}'));
           }
-          final players = snapshot.data ?? [];
-          if (players.isEmpty) {
-            return const Center(child: Text('No players yet!'));
+          final teams = snapshot.data ?? [];
+          if (teams.isEmpty) {
+            return const Center(child: Text('No teams yet!'));
           }
           return GridView.builder(
             padding: const EdgeInsets.all(16.0),
@@ -69,12 +69,12 @@ class _PlayerPageState extends State<PlayerPage> {
               mainAxisSpacing: 16.0,
               childAspectRatio: 1.0,
             ),
-            itemCount: players.length,
+            itemCount: teams.length,
             itemBuilder: (context, index) {
-              final player = players[index];
-              return PlayerListItem(
-                player: player,
-                onEdit: () => _navigateToAddPlayer(player: player),
+              final team = teams[index];
+              return TeamListItem(
+                team: team,
+                onEdit: () => _navigateToAddTeam(team: team),
               );
             },
           );
@@ -85,17 +85,17 @@ class _PlayerPageState extends State<PlayerPage> {
         backgroundColor: Colors.amber,
         shape: const CircleBorder(),
         child: const Icon(Icons.add, color: Colors.black),
-        onPressed: () => _navigateToAddPlayer(),
+        onPressed: () => _navigateToAddTeam(),
       ),
     );
   }
 }
 
-class PlayerListItem extends StatelessWidget {
-  final Player player;
+class TeamListItem extends StatelessWidget {
+  final Team team;
   final VoidCallback onEdit;
 
-  const PlayerListItem({super.key, required this.player, required this.onEdit});
+  const TeamListItem({super.key, required this.team, required this.onEdit});
 
   @override
   Widget build(BuildContext context) {
@@ -109,17 +109,19 @@ class PlayerListItem extends StatelessWidget {
             gradient: LinearGradient(
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
-              colors: [player.color, Colors.white],
+              colors: [team.color, Colors.white],
             ),
             borderRadius: BorderRadius.circular(16),
           ),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Icon(CustomIcons.player, size: 60, color: Colors.black),
+              Icon(CustomIcons.teams, size: 60, color: Colors.black),
               const SizedBox(height: 8),
               Text(
-                player.name,
+                team.name,
+                textAlign: TextAlign.center,
                 style: const TextStyle(
                   color: Colors.black,
                   fontWeight: FontWeight.bold,

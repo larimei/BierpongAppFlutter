@@ -1,44 +1,46 @@
 import 'package:flutter/material.dart';
-import 'addplayer.dart';
-import 'package:bierpongapp/db/playersrepository.dart';
-import 'package:bierpongapp/domain/player.dart';
+import 'addcompetition/addcompetition_page.dart';
+import 'package:bierpongapp/db/tournamentsrepository.dart';
+import 'package:bierpongapp/domain/tournament.dart';
 import 'package:bierpongapp/ui/customicons.dart';
 
-class PlayerPage extends StatefulWidget {
-  const PlayerPage({super.key});
+class CompetitionsPage extends StatefulWidget {
+  const CompetitionsPage({super.key});
 
   @override
-  State<PlayerPage> createState() => _PlayerPageState();
+  State<CompetitionsPage> createState() => _CompetitionsPageState();
 }
 
-class _PlayerPageState extends State<PlayerPage> {
-  final _playersRepository = PlayersRepository();
-  late Future<List<Player>> _playersFuture;
+class _CompetitionsPageState extends State<CompetitionsPage> {
+  final _tournamentsRepository = TournamentsRepository();
+  late Future<List<Tournament>> _tournamentsFuture;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _fetchPlayers();
+    _fetchTournaments();
   }
 
-  void _fetchPlayers() {
+  void _fetchTournaments() {
     setState(() {
-      _playersFuture = _playersRepository.list();
+      _tournamentsFuture = _tournamentsRepository.list();
     });
   }
 
-  Future<void> _navigateToAddPlayer({Player? player}) async {
+  Future<void> _navigateToAddCompetition({Tournament? tournament}) async {
     final String? resultName = await Navigator.push<String>(
       context,
-      MaterialPageRoute(builder: (_) => AddPlayerPage(player: player)),
+      MaterialPageRoute(
+        builder: (_) => AddCompetitionPage(tournament: tournament),
+      ),
     );
 
     if (resultName != null && context.mounted) {
-      _fetchPlayers();
+      _fetchTournaments();
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            'Player ${player == null ? 'added' : 'updated'}: $resultName',
+            'Tournament ${tournament == null ? 'added' : 'updated'}: $resultName',
           ),
         ),
       );
@@ -48,8 +50,8 @@ class _PlayerPageState extends State<PlayerPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: FutureBuilder<List<Player>>(
-        future: _playersFuture,
+      body: FutureBuilder<List<Tournament>>(
+        future: _tournamentsFuture,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
@@ -57,9 +59,9 @@ class _PlayerPageState extends State<PlayerPage> {
           if (snapshot.hasError) {
             return Center(child: Text('Error: ${snapshot.error}'));
           }
-          final players = snapshot.data ?? [];
-          if (players.isEmpty) {
-            return const Center(child: Text('No players yet!'));
+          final tournaments = snapshot.data ?? [];
+          if (tournaments.isEmpty) {
+            return const Center(child: Text('No tournaments yet!'));
           }
           return GridView.builder(
             padding: const EdgeInsets.all(16.0),
@@ -69,12 +71,12 @@ class _PlayerPageState extends State<PlayerPage> {
               mainAxisSpacing: 16.0,
               childAspectRatio: 1.0,
             ),
-            itemCount: players.length,
+            itemCount: tournaments.length,
             itemBuilder: (context, index) {
-              final player = players[index];
-              return PlayerListItem(
-                player: player,
-                onEdit: () => _navigateToAddPlayer(player: player),
+              final tournament = tournaments[index];
+              return CompetitionListItem(
+                tournament: tournament,
+                onEdit: () => _navigateToAddCompetition(tournament: tournament),
               );
             },
           );
@@ -85,17 +87,21 @@ class _PlayerPageState extends State<PlayerPage> {
         backgroundColor: Colors.amber,
         shape: const CircleBorder(),
         child: const Icon(Icons.add, color: Colors.black),
-        onPressed: () => _navigateToAddPlayer(),
+        onPressed: () => _navigateToAddCompetition(),
       ),
     );
   }
 }
 
-class PlayerListItem extends StatelessWidget {
-  final Player player;
+class CompetitionListItem extends StatelessWidget {
+  final Tournament tournament;
   final VoidCallback onEdit;
 
-  const PlayerListItem({super.key, required this.player, required this.onEdit});
+  const CompetitionListItem({
+    super.key,
+    required this.tournament,
+    required this.onEdit,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -109,17 +115,19 @@ class PlayerListItem extends StatelessWidget {
             gradient: LinearGradient(
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
-              colors: [player.color, Colors.white],
+              colors: [tournament.color, Colors.white],
             ),
             borderRadius: BorderRadius.circular(16),
           ),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Icon(CustomIcons.player, size: 60, color: Colors.black),
+              Icon(CustomIcons.competitions, size: 60, color: Colors.black),
               const SizedBox(height: 8),
               Text(
-                player.name,
+                tournament.name,
+                textAlign: TextAlign.center,
                 style: const TextStyle(
                   color: Colors.black,
                   fontWeight: FontWeight.bold,
