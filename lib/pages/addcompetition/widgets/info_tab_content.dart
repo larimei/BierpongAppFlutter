@@ -30,6 +30,16 @@ class InfoTabContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    const buttonStyle = ButtonStyle(
+      backgroundColor: MaterialStatePropertyAll(Color(0xFF152559)),
+      foregroundColor: MaterialStatePropertyAll(Colors.white),
+      shape: MaterialStatePropertyAll(RoundedRectangleBorder(
+        borderRadius: BorderRadius.all(Radius.circular(8)),
+      )),
+      elevation: MaterialStatePropertyAll(2),
+      minimumSize: MaterialStatePropertyAll(Size.fromHeight(46)),
+    );
+
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
@@ -125,30 +135,14 @@ class InfoTabContent extends StatelessWidget {
           onPressed: onAddTeam,
           icon: const Icon(Icons.group_add_outlined),
           label: const Text('Add Team'),
-          style: ElevatedButton.styleFrom(
-            backgroundColor: const Color(0xFF152559),
-            foregroundColor: Colors.white,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8),
-            ),
-            elevation: 2,
-            minimumSize: const Size.fromHeight(46),
-          ),
+          style: buttonStyle,
         ),
         const SizedBox(height: 12),
         ElevatedButton.icon(
           onPressed: onSaveTournament,
           icon: const Icon(Icons.save_outlined),
           label: Text(isEditing ? 'Save' : 'Add'),
-          style: ElevatedButton.styleFrom(
-            backgroundColor: const Color(0xFF152559),
-            foregroundColor: Colors.white,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8),
-            ),
-            elevation: 2,
-            minimumSize: const Size.fromHeight(46),
-          ),
+          style: buttonStyle,
         ),
       ],
     );

@@ -47,15 +47,44 @@ class Tournament {
     'rounds': rounds,
   };
 
-  factory Tournament.fromJson(Map<String, dynamic> j) => Tournament(
-    id: j['id'] as String,
-    name: j['name'] as String,
-    mode: TournamentMode.values.firstWhere(
-      (e) => e.toString().split('.').last == j['mode'] as String,
-      orElse: () => TournamentMode.knockout,
-    ),
-    teamIds: List<String>.from(j['teamIds'] ?? []),
-    color: Color(j['color'] as int),
-    rounds: List<Map<String, dynamic>>.from(j['rounds'] ?? []),
-  );
+  factory Tournament.fromJson(Map<String, dynamic> j) {
+    final List<dynamic>? rawRounds = j['rounds'] as List<dynamic>?;
+    final List<Map<String, dynamic>> processedRounds = [];
+
+    if (rawRounds != null) {
+      for (final dynamic rawRound in rawRounds) {
+        final Map<String, dynamic> roundMap = {};
+        if (rawRound is Map) {
+          roundMap.addAll(Map<String, dynamic>.from(rawRound));
+        } else {
+          continue;
+        }
+
+        final List<dynamic>? rawMatches = roundMap['matches'] as List<dynamic>?;
+        final List<Map<String, dynamic>> processedMatches = [];
+
+        if (rawMatches != null) {
+          for (final dynamic rawMatch in rawMatches) {
+            if (rawMatch is Map) {
+              processedMatches.add(Map<String, dynamic>.from(rawMatch));
+            }
+          }
+        }
+        roundMap['matches'] = processedMatches;
+        processedRounds.add(roundMap);
+      }
+    }
+
+    return Tournament(
+      id: j['id'] as String,
+      name: j['name'] as String,
+      mode: TournamentMode.values.firstWhere(
+        (e) => e.toString().split('.').last == j['mode'] as String,
+        orElse: () => TournamentMode.knockout,
+      ),
+      teamIds: List<String>.from(j['teamIds'] ?? []),
+      color: Color(j['color'] as int),
+      rounds: processedRounds,
+    );
+  }
 }
